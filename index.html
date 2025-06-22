@@ -1,23 +1,91 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trang Web Đầu Tiên</title>
+  <meta charset="UTF-8">
+  <title>Đếm ngược 60s</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f2f5;
-      text-align: center;
-      padding-top: 100px;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
     }
     h1 {
-      color: #007bff;
+      font-size: 5rem;
+      margin-bottom: 30px;
+      color: #333;
     }
+    .buttons button {
+      font-size: 1.2rem;
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .start { background-color: #28a745; color: white; }
+    .pause { background-color: #ffc107; color: black; }
+    .reset { background-color: #dc3545; color: white; }
+    .start:hover { background-color: #218838; }
+    .pause:hover { background-color: #e0a800; }
+    .reset:hover { background-color: #c82333; }
   </style>
 </head>
 <body>
-  <h1>Hello!</h1>
-  <p>Đây là trang web đầu tiên của bạn.</p>
+
+  <h1 id="timer">60</h1>
+
+  <div class="buttons">
+    <button class="start" onclick="startCountdown()">Bắt đầu</button>
+    <button class="pause" onclick="pauseCountdown()">Tạm dừng</button>
+    <button class="reset" onclick="resetCountdown()">Hủy</button>
+  </div>
+
+  <script>
+    let countdown;
+    let timeLeft = 60;
+    let isRunning = false;
+
+    function updateDisplay() {
+      document.getElementById('timer').textContent = timeLeft;
+    }
+
+    function startCountdown() {
+      if (!isRunning && timeLeft > 0) {
+        isRunning = true;
+        countdown = setInterval(() => {
+          if (timeLeft > 0) {
+            timeLeft--;
+            updateDisplay();
+          } else {
+            clearInterval(countdown);
+            isRunning = false;
+            alert("Hết giờ!");
+          }
+        }, 1000);
+      }
+    }
+
+    function pauseCountdown() {
+      clearInterval(countdown);
+      isRunning = false;
+    }
+
+    function resetCountdown() {
+      clearInterval(countdown);
+      timeLeft = 60;
+      updateDisplay();
+      isRunning = false;
+    }
+
+    // Khởi tạo hiển thị ban đầu
+    updateDisplay();
+  </script>
+
 </body>
 </html>
