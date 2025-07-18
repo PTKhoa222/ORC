@@ -174,7 +174,7 @@
     <button onclick="resetTimer()" class="tmrbtn reset">Đặt Lại</button><br>
     <button class="widebtn gray" onclick="switchCountdown()" id="countdownSwitch">Tắt Đếm Ngược</button><br>
     <button class="widebtn gray" onclick="switchAutoMode()" id="autoModeSwitch">Không Chạy Tự Động</button><br>
-    <button class="widebtn gray" onclick="switchEliminationMode()" id="eliminationSwitch">Bật Vòng Thi Đấu Loại</button><br>
+    <button class="widebtn gray" onclick="switchEliminationMode()" id="eliminationSwitch">Vòng Thi Đấu Loại</button><br>
     <button class="widebtn gray" onclick="switchToCalc()">Máy Tính Điểm</button>
   </center>
 </div>
@@ -293,7 +293,7 @@
 
   function switchEliminationMode() {
     eliminationMode = !eliminationMode;
-    document.getElementById("eliminationSwitch").innerText = eliminationMode ? "Tắt Vòng Thi Đấu Loại" : "Bật Vòng Thi Đấu Loại";
+    document.getElementById("eliminationSwitch").innerText = eliminationMode ? "Vòng Thi Đấu Trung Kết" : "Vòng Thi Đấu Loại";
     resetTimer();
   }
 
