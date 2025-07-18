@@ -174,6 +174,7 @@
     <button onclick="resetTimer()" class="tmrbtn reset">Đặt Lại</button><br>
     <button class="widebtn gray" onclick="switchCountdown()" id="countdownSwitch">Tắt Đếm Ngược</button><br>
     <button class="widebtn gray" onclick="switchAutoMode()" id="autoModeSwitch">Không Chạy Tự Động</button><br>
+    <button class="widebtn gray" onclick="switchEliminationMode()" id="eliminationSwitch">Bật Vòng Thi Đấu Loại</button><br>
     <button class="widebtn gray" onclick="switchToCalc()">Máy Tính Điểm</button>
   </center>
 </div>
@@ -185,6 +186,7 @@
   let inCountDown = true;
   let enableCountdown = true;
   let autoMode = true;
+  let eliminationMode = false;
   const fullDash = 2 * Math.PI * 100;
   const circle = document.querySelector('.circle-progress');
   const text = document.getElementById('timerDisp');
@@ -196,7 +198,9 @@
 
   function updateCircle() {
     let displayTime = secRem;
-    let max = inCountDown ? 3 : (autoMode ? 150 : 120);
+    let mainTime = eliminationMode ? 90 : 120;
+    let totalTime = autoMode ? (eliminationMode ? 120 : 150) : mainTime;
+    let max = inCountDown ? 3 : totalTime;
     let offset = fullDash * (1 - displayTime / max);
     circle.style.strokeDashoffset = offset;
     text.textContent = displayTime + 's';
@@ -228,11 +232,11 @@
   function resetTimer() {
     clearInterval(interval);
     if (autoMode) {
-      secRem = 150;
-      text.textContent = '150s';
+      secRem = eliminationMode ? 120 : 150;
+      text.textContent = (eliminationMode ? 120 : 150) + 's';
     } else {
-      secRem = 120;
-      text.textContent = '120s';
+      secRem = eliminationMode ? 90 : 120;
+      text.textContent = (eliminationMode ? 90 : 120) + 's';
     }
     readyToStart = true;
     inCountDown = true;
@@ -242,13 +246,22 @@
   function timerCount() {
     secRem--;
     updateCircle();
-    if (secRem === 120) switchSound.play();
+    
+    // Âm thanh switch khi còn 90s (sau 30s đầu trong chế độ tự động)
+    if (autoMode && secRem === 90) {
+      switchSound.play();
+    }
+    // Âm thanh switch khi còn 120s (trong chế độ tự động bình thường)
+    if (autoMode && !eliminationMode && secRem === 120) {
+      switchSound.play();
+    }
+    
     if (secRem <= 0) {
       if (inCountDown) {
         if (autoMode) {
-          secRem = 150;
+          secRem = eliminationMode ? 120 : 150;
         } else {
-          secRem = 120;
+          secRem = eliminationMode ? 90 : 120;
         }
         inCountDown = false;
         startSound.play();
@@ -276,6 +289,12 @@
   function switchCountdown() {
     enableCountdown = !enableCountdown;
     document.getElementById("countdownSwitch").innerText = enableCountdown ? "Tắt Đếm Ngược" : "Bật Đếm Ngược";
+  }
+
+  function switchEliminationMode() {
+    eliminationMode = !eliminationMode;
+    document.getElementById("eliminationSwitch").innerText = eliminationMode ? "Tắt Vòng Thi Đấu Loại" : "Bật Vòng Thi Đấu Loại";
+    resetTimer();
   }
 
   function calculateScores() {
