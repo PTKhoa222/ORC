@@ -179,7 +179,7 @@
 </div>
 
 <script>
-  let secRem = 4;
+  let secRem = 3;
   let interval;
   let readyToStart = true;
   let inCountDown = true;
@@ -196,7 +196,7 @@
 
   function updateCircle() {
     let displayTime = secRem;
-    let max = inCountDown ? 4 : (autoMode ? 150 : 120);
+    let max = inCountDown ? 3 : (autoMode ? 150 : 120);
     let offset = fullDash * (1 - displayTime / max);
     circle.style.strokeDashoffset = offset;
     text.textContent = displayTime + 's';
@@ -205,11 +205,12 @@
   function startTimer() {
     if (readyToStart) {
       if (autoMode) {
-        secRem = enableCountdown ? 4 : 1;
-        inCountDown = true;
+        secRem = enableCountdown ? 3 : 1;
+        inCountDown = enableCountdown;
       } else {
-        secRem = 120;
-        inCountDown = false;
+        // Chế độ thủ công vẫn có đếm ngược 3 giây
+        secRem = enableCountdown ? 3 : 1;
+        inCountDown = enableCountdown;
       }
       updateCircle();
       timerCount();
@@ -244,7 +245,11 @@
     if (secRem === 120) switchSound.play();
     if (secRem <= 0) {
       if (inCountDown) {
-        secRem = 150;
+        if (autoMode) {
+          secRem = 150;
+        } else {
+          secRem = 120;
+        }
         inCountDown = false;
         startSound.play();
       } else {
