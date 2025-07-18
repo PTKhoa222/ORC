@@ -1,343 +1,202 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>ORC Score Calculator + Timer</title>
+  <title>Match Timer</title>
   <style>
     body {
-      background: #222;
-      font-family: arial;
+      font-family: sans-serif;
+      text-align: center;
+      background: #111;
       color: white;
-      margin: 0;
-      padding: 0;
-    }
-    .centered_calc, .centered_timer {
-      width: 620px;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-    label {
-      font-size: 18px;
-    }
-    input, select {
-      background: #ddd;
-      font-size: 16px;
-      border: 0.2px solid black;
-    }
-    input {
-      width: 50px;
-      height: 20px;
-    }
-    select {
-      width: 100px;
-      height: 25px;
-    }
-    .tmrbtn, .widebtn {
-      font-size: 20px;
-      border-radius: 10px;
-      padding: 10px;
-      margin: 10px;
-      background-color: #222;
-      cursor: pointer;
-      color: white;
-      border: none;
+      margin-top: 50px;
     }
 
-    /* Clear Fields - viền đỏ */
-    .widebtn.clear {
-      border: 4px solid #f33;
-    }
-    .widebtn.clear:hover {
-      background-color: #f33;
-      color: black;
-    }
-
-    /* Match Timer, Score Calculator, Disable Countdown - viền xám */
-    .widebtn.gray {
-      border: 4px solid gray;
-    }
-    .widebtn.gray:hover {
-      background-color: gray;
-      color: black;
-    }
-
-    /* Start - xanh lá */
-    .tmrbtn.start {
-      border: 4px solid #1d1;
-      color: #1d1;
-    }
-    .tmrbtn.start:hover {
-      background-color: #1d1;
-      color: black;
-    }
-
-    /* Stop - đỏ */
-    .tmrbtn.stop {
-      border: 4px solid #f33;
-      color: #f33;
-    }
-    .tmrbtn.stop:hover {
-      background-color: #f33;
-      color: black;
-    }
-
-    /* Reset - xanh dương */
-    .tmrbtn.reset {
-      border: 4px solid #33f;
-      color: #33f;
-    }
-    .tmrbtn.reset:hover {
-      background-color: #33f;
-      color: black;
-    }
-
-    .timer-circle {
+    .circle-container {
       position: relative;
-      width: 240px;
-      height: 240px;
-      margin: auto;
+      width: 220px;
+      height: 220px;
+      margin: 0 auto;
     }
+
     svg {
       transform: rotate(-90deg);
     }
+
     .circle-bg {
-      stroke: #444;
+      fill: none;
+      stroke: #333;
+      stroke-width: 15;
     }
+
     .circle-progress {
-      stroke: white;
-      transition: stroke-dashoffset 1s linear;
+      fill: none;
+      stroke: #00ff00;
+      stroke-width: 15;
       stroke-linecap: round;
+      stroke-dasharray: 628;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 1s linear;
     }
-    .time-text {
+
+    #timerDisp {
+      font-size: 48px;
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 48px;
-      font-weight: bold;
-      user-select: none;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 18px;
+      background-color: #222;
+      color: white;
+      border: 2px solid #555;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #333;
+    }
+
+    .toggle {
+      display: flex;
+      justify-content: center;
+      margin: 10px;
+    }
+
+    .toggle label {
+      margin: 0 10px;
+      font-size: 16px;
     }
   </style>
 </head>
 <body>
+  <h1>Match Timer</h1>
 
-<div id="slapshotCalculator" class="centered_calc" style="display: block;">
-  <center>
-    <h1>Máy Tính Điểm ORC</h1>
-    <form>
-      <label>Khối hình cầu trong khu vực ghi điểm</label>
-      <input type="number" id="ballsInScoring" placeholder="0" onchange="calculateScores()"><br><br>
-      
-      <label>Khối hình vuông trong khu vực ghi điểm hoặc trong vòng kết nối</label>
-      <input type="number" id="cubesInScoring" placeholder="0" onchange="calculateScores()"><br><br>
-      
-      <label>Khối hình cầu trong khung thành</label>
-      <input type="number" id="ballsInGoal" placeholder="0" onchange="calculateScores()"><br><br>
-      
-      <label>Khối cầu nằm trong vòng kết nối</label>
-      <input type="number" id="ballsInRing" placeholder="0" onchange="calculateScores()"><br><br>
-      
-      <label>Khối hình vuông trong khung thành</label>
-      <input type="number" id="cubesInGoal" placeholder="0" onchange="calculateScores()"><br><br>
-      
-      <label>Khối hình vuông nằm trên khối vuông khác trong khu vực ghi điểm</label>
-      <input type="number" id="cubesStacked" placeholder="0" onchange="calculateScores()"><br><br>
-      
-      <label>Khối hình vuông nằm trên khối hình vuông khác trong khung thành</label>
-      <input type="number" id="cubesStackedGoal" placeholder="0" onchange="calculateScores()"><br><br>
-      
-      <label>Bánh xe không chạm mặt sàn</label>
-      <input type="number" id="wheelsOff" placeholder="0" max="4" onchange="calculateScores()"><br><br>
-    </form>
-    <h1 id="finalScore" style="font-size: 60px;">Điểm: 0</h1>
-    <button class="widebtn clear" onclick="clearFields()">Xóa Dữ Liệu</button><br>
-    <button class="widebtn gray" onclick="switchToTimer()">Bộ Đếm Giờ</button>
-  </center>
-</div>
+  <div class="circle-container">
+    <svg width="220" height="220">
+      <circle class="circle-bg" cx="110" cy="110" r="100" />
+      <circle class="circle-progress" cx="110" cy="110" r="100" />
+    </svg>
+    <div id="timerDisp">3s</div>
+  </div>
 
-<div id="vexiqTimer" class="centered_timer" style="display: none;">
-  <center>
-    <h1>Bộ Đếm Giờ ORC</h1>
-    <div class="timer-circle">
-      <svg width="240" height="240">
-        <circle class="circle-bg" cx="120" cy="120" r="100" stroke-width="15" fill="none"/>
-        <circle class="circle-progress" cx="120" cy="120" r="100" stroke-width="15" fill="none"
-                stroke-dasharray="628.3" stroke-dashoffset="0"/>
-      </svg>
-      <div class="time-text" id="timerDisp">150s</div>
-    </div>
-    <br>
-    <button onclick="startTimer()" class="tmrbtn start">Bắt Đầu</button>
-    <button onclick="stopTimer()" class="tmrbtn stop">Dừng</button>
-    <button onclick="resetTimer()" class="tmrbtn reset">Đặt Lại</button><br>
-    <button class="widebtn gray" onclick="switchCountdown()" id="countdownSwitch">Tắt Đếm Ngược</button><br>
-    <button class="widebtn gray" onclick="switchAutoMode()" id="autoModeSwitch">Không Chạy Tự Động</button><br>
-    <button class="widebtn gray" onclick="switchEliminationMode()" id="eliminationSwitch">Vòng Thi Đấu Loại</button><br>
-    <button class="widebtn gray" onclick="switchToCalc()">Máy Tính Điểm</button>
-  </center>
-</div>
+  <div class="toggle">
+    <label><input type="checkbox" id="autoToggle" checked> Auto Mode</label>
+    <label><input type="checkbox" id="eliminationToggle"> Elimination</label>
+    <label><input type="checkbox" id="countdownToggle" checked> 3s Countdown</label>
+  </div>
 
-<script>
-  let secRem = 3;
-  let interval;
-  let readyToStart = true;
-  let inCountDown = true;
-  let enableCountdown = true;
-  let autoMode = true;
-  let eliminationMode = false;
-  const fullDash = 2 * Math.PI * 100;
-  const circle = document.querySelector('.circle-progress');
-  const text = document.getElementById('timerDisp');
+  <div>
+    <button onclick="startTimer()">Start</button>
+    <button onclick="resetTimer()">Reset</button>
+  </div>
 
-  let startSound = new Audio("https://www.studentroboticseducation.com/wp-content/uploads/2022/07/Match-start-sound.mp3")
-  let endSound = new Audio("https://www.studentroboticseducation.com/wp-content/uploads/2022/07/Match-end-sound.mp3")
-  let switchSound = new Audio("https://www.studentroboticseducation.com/wp-content/uploads/2022/07/Match-driver-switch-sound.mp3")
-  let shortBeep = new Audio("https://www.studentroboticseducation.com/wp-content/uploads/2022/07/Short-beep.mp3")
+  <script>
+    let secRem = 3;
+    let interval;
+    let readyToStart = true;
+    let inCountDown = true;
+    let enableCountdown = true;
+    let autoMode = true;
+    let eliminationMode = false;
+    const fullDash = 2 * Math.PI * 100;
+    const circle = document.querySelector('.circle-progress');
+    const text = document.getElementById('timerDisp');
 
-  function updateCircle() {
-    let displayTime = secRem;
-    let mainTime = eliminationMode ? 90 : 120;
-    let totalTime = autoMode ? (eliminationMode ? 120 : 150) : mainTime;
-    let max = inCountDown ? 3 : totalTime;
-    let offset = fullDash * (1 - displayTime / max);
-    circle.style.strokeDashoffset = offset;
-    text.textContent = displayTime + 's';
-  }
+    // Âm thanh (đặt trong thư mục sounds/)
+    let startSound = new Audio("sounds/start.mp3");
+    let endSound = new Audio("sounds/end.mp3");
+    let switchSound = new Audio("sounds/switch.mp3");
+    let shortBeep = new Audio("sounds/beep.mp3");
 
-  function startTimer() {
-    if (readyToStart) {
-      if (autoMode) {
-        secRem = enableCountdown ? 3 : 1;
-        inCountDown = enableCountdown;
-      } else {
-        // Chế độ thủ công vẫn có đếm ngược 3 giây
-        secRem = enableCountdown ? 3 : 1;
-        inCountDown = enableCountdown;
-      }
-      updateCircle();
-      timerCount();
-      interval = setInterval(timerCount, 1000);
-      readyToStart = false;
+    // Cập nhật hình tròn
+    function updateCircle() {
+      let displayTime = secRem;
+      let mainTime = eliminationMode ? 90 : 120;
+      let totalTime = autoMode ? (eliminationMode ? 120 : 150) : mainTime;
+      let max = inCountDown ? 3 : totalTime;
+      let offset = fullDash * (1 - displayTime / max);
+      circle.style.strokeDashoffset = offset;
+      text.textContent = displayTime + 's';
     }
-  }
 
-  function stopTimer() {
-    clearInterval(interval);
-    endSound.play();
-    readyToStart = true;
-  }
-
-  function resetTimer() {
-    clearInterval(interval);
-    if (autoMode) {
-      secRem = eliminationMode ? 120 : 150;
-      text.textContent = (eliminationMode ? 120 : 150) + 's';
-    } else {
-      secRem = eliminationMode ? 90 : 120;
-      text.textContent = (eliminationMode ? 90 : 120) + 's';
-    }
-    readyToStart = true;
-    inCountDown = true;
-    circle.style.strokeDashoffset = 0;
-  }
-
-  function timerCount() {
-    secRem--;
-    updateCircle();
-    
-    // Âm thanh switch khi còn 90s (sau 30s đầu trong chế độ tự động)
-    if (autoMode && secRem === 90) {
-      switchSound.play();
-    }
-    // Âm thanh switch khi còn 120s (trong chế độ tự động bình thường)
-    if (autoMode && !eliminationMode && secRem === 120) {
-      switchSound.play();
-    }
-    
-    if (secRem <= 0) {
-      if (inCountDown) {
-        if (autoMode) {
-          secRem = eliminationMode ? 120 : 150;
+    function startTimer() {
+      if (readyToStart) {
+        if (enableCountdown) {
+          secRem = 3;
+          inCountDown = true;
         } else {
-          secRem = eliminationMode ? 90 : 120;
+          secRem = autoMode ? (eliminationMode ? 120 : 150) : (eliminationMode ? 90 : 120);
+          inCountDown = false;
+          startSound.play();
         }
-        inCountDown = false;
-        startSound.play();
-      } else {
-        stopTimer();
+        updateCircle();
+        timerCount();
+        interval = setInterval(timerCount, 1000);
+        readyToStart = false;
       }
     }
-    if (inCountDown) shortBeep.play();
-  }
 
-  function switchToTimer() {
-    document.getElementById("slapshotCalculator").style.display = "none";
-    document.getElementById("vexiqTimer").style.display = "block";
-  }
-  function switchToCalc() {
-    document.getElementById("slapshotCalculator").style.display = "block";
-    document.getElementById("vexiqTimer").style.display = "none";
-  }
-  function switchAutoMode() {
-    autoMode = !autoMode;
-    document.getElementById("autoModeSwitch").innerText = autoMode ? "Không Chạy Tự Động" : "Chạy Tự Động";
-    resetTimer();
-  }
+    function stopTimer() {
+      clearInterval(interval);
+      endSound.play();
+      readyToStart = true;
+    }
 
-  function switchCountdown() {
-    enableCountdown = !enableCountdown;
-    document.getElementById("countdownSwitch").innerText = enableCountdown ? "Tắt Đếm Ngược" : "Bật Đếm Ngược";
-  }
+    function resetTimer() {
+      clearInterval(interval);
+      inCountDown = enableCountdown;
+      secRem = inCountDown ? 3 : (autoMode ? (eliminationMode ? 120 : 150) : (eliminationMode ? 90 : 120));
+      updateCircle();
+      readyToStart = true;
+    }
 
-  function switchEliminationMode() {
-    eliminationMode = !eliminationMode;
-    document.getElementById("eliminationSwitch").innerText = eliminationMode ? "Vòng Thi Đấu Trung Kết" : "Vòng Thi Đấu Loại";
-    resetTimer();
-  }
+    function timerCount() {
+      updateCircle();
+      if (secRem === 0) {
+        if (inCountDown) {
+          // Hết 3s đếm ngược → bắt đầu trận
+          inCountDown = false;
+          secRem = autoMode ? (eliminationMode ? 120 : 150) : (eliminationMode ? 90 : 120);
+          startSound.play();
+        } else {
+          stopTimer();
+        }
+      } else {
+        if (!inCountDown) {
+          if (secRem === (eliminationMode ? 60 : 90)) {
+            switchSound.play();
+          } else if (secRem <= 5) {
+            shortBeep.play();
+          }
+        }
+        secRem--;
+      }
+    }
 
-  function calculateScores() {
-    // New scoring system based on Vietnamese table
-    const ballsInScoring = parseInt(document.getElementById("ballsInScoring").value) || 0;
-    const cubesInScoring = parseInt(document.getElementById("cubesInScoring").value) || 0;
-    const ballsInGoal = parseInt(document.getElementById("ballsInGoal").value) || 0;
-    const ballsInRing = parseInt(document.getElementById("ballsInRing").value) || 0;
-    const cubesInGoal = parseInt(document.getElementById("cubesInGoal").value) || 0;
-    const cubesStacked = parseInt(document.getElementById("cubesStacked").value) || 0;
-    const cubesStackedGoal = parseInt(document.getElementById("cubesStackedGoal").value) || 0;
-    const wheelsOff = parseInt(document.getElementById("wheelsOff").value) || 0;
-
-    let score = 0;
-    score += ballsInScoring * 2;      // 2 điểm
-    score += cubesInScoring * 5;      // 5 điểm
-    score += ballsInGoal * 5;         // 5 điểm
-    score += ballsInRing * 8;         // 8 điểm
-    score += cubesInGoal * 12;        // 12 điểm
-    score += cubesStacked * 12;       // 12 điểm
-    score += cubesStackedGoal * 18;   // 18 điểm
-    score += wheelsOff * 5;           // 5 điểm per wheel
-
-    // Validation checks
-    const invalid = ballsInScoring < 0 || cubesInScoring < 0 || ballsInGoal < 0 || 
-                   ballsInRing < 0 || cubesInGoal < 0 || cubesStacked < 0 || 
-                   cubesStackedGoal < 0 || wheelsOff < 0 || wheelsOff > 4;
-
-    const result = document.getElementById("finalScore");
-    result.style.color = invalid ? "red" : "white";
-    result.innerText = (invalid ? "Điểm Không Hợp Lệ: " : "Điểm: ") + score;
-  }
-
-  function clearFields() {
-    ["ballsInScoring", "cubesInScoring", "ballsInGoal", "ballsInRing", 
-     "cubesInGoal", "cubesStacked", "cubesStackedGoal", "wheelsOff"].forEach(id => {
-      document.getElementById(id).value = "";
+    // Xử lý checkbox
+    document.getElementById("autoToggle").addEventListener("change", (e) => {
+      autoMode = e.target.checked;
+      resetTimer();
     });
-    calculateScores();
-  }
 
-  switchToCalc();
-</script>
+    document.getElementById("eliminationToggle").addEventListener("change", (e) => {
+      eliminationMode = e.target.checked;
+      resetTimer();
+    });
 
+    document.getElementById("countdownToggle").addEventListener("change", (e) => {
+      enableCountdown = e.target.checked;
+      resetTimer();
+    });
+
+    // Khởi tạo lần đầu
+    resetTimer();
+  </script>
 </body>
 </html>
