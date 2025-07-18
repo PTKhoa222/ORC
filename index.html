@@ -173,6 +173,7 @@
     <button onclick="stopTimer()" class="tmrbtn stop">Dừng</button>
     <button onclick="resetTimer()" class="tmrbtn reset">Đặt Lại</button><br>
     <button class="widebtn gray" onclick="switchCountdown()" id="countdownSwitch">Tắt Đếm Ngược</button><br>
+    <button class="widebtn gray" onclick="switchAutoMode()" id="autoModeSwitch">Không Chạy Tự Động</button><br>
     <button class="widebtn gray" onclick="switchToCalc()">Máy Tính Điểm</button>
   </center>
 </div>
@@ -183,6 +184,7 @@
   let readyToStart = true;
   let inCountDown = true;
   let enableCountdown = true;
+  let autoMode = true;
   const fullDash = 2 * Math.PI * 100;
   const circle = document.querySelector('.circle-progress');
   const text = document.getElementById('timerDisp');
@@ -194,7 +196,7 @@
 
   function updateCircle() {
     let displayTime = secRem;
-    let max = inCountDown ? 4 : 150;
+    let max = inCountDown ? 4 : (autoMode ? 150 : 120);
     let offset = fullDash * (1 - displayTime / max);
     circle.style.strokeDashoffset = offset;
     text.textContent = displayTime + 's';
@@ -202,8 +204,13 @@
 
   function startTimer() {
     if (readyToStart) {
-      secRem = enableCountdown ? 4 : 1;
-      inCountDown = true;
+      if (autoMode) {
+        secRem = enableCountdown ? 4 : 1;
+        inCountDown = true;
+      } else {
+        secRem = 120;
+        inCountDown = false;
+      }
       updateCircle();
       timerCount();
       interval = setInterval(timerCount, 1000);
@@ -219,17 +226,22 @@
 
   function resetTimer() {
     clearInterval(interval);
-    secRem = 150;
+    if (autoMode) {
+      secRem = 150;
+      text.textContent = '150s';
+    } else {
+      secRem = 120;
+      text.textContent = '120s';
+    }
     readyToStart = true;
     inCountDown = true;
-    text.textContent = '150s';
     circle.style.strokeDashoffset = 0;
   }
 
   function timerCount() {
     secRem--;
     updateCircle();
-    if (secRem === 25 || secRem === 35) switchSound.play();
+    if (secRem === 120) switchSound.play();
     if (secRem <= 0) {
       if (inCountDown) {
         secRem = 150;
@@ -250,6 +262,12 @@
     document.getElementById("slapshotCalculator").style.display = "block";
     document.getElementById("vexiqTimer").style.display = "none";
   }
+  function switchAutoMode() {
+    autoMode = !autoMode;
+    document.getElementById("autoModeSwitch").innerText = autoMode ? "Không Chạy Tự Động" : "Chạy Tự Động";
+    resetTimer();
+  }
+
   function switchCountdown() {
     enableCountdown = !enableCountdown;
     document.getElementById("countdownSwitch").innerText = enableCountdown ? "Tắt Đếm Ngược" : "Bật Đếm Ngược";
